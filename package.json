@@ -15,7 +15,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test src/components/Pagination.test.js",
+    "test": "react-scripts test src/components/Search.test.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

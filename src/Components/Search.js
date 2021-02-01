@@ -42,10 +42,10 @@ const Search = ({ query, limit }) => {
   // https://www.youtube.com/watch?v=rP-ZARMGY10
   // https://github.com/reddit-archive/reddit/wiki/JSON
 
-  const fetchItems = (endpoint) => {
+  const fetchItems = (subreddit, limit) => {
     setIsLoading(true);
     reddit
-      .search(endpoint)
+      .search(subreddit, limit)
       .then((items) => {
         const { after, before, children } = items.data;
         setData(children);
@@ -56,7 +56,69 @@ const Search = ({ query, limit }) => {
         }
 
         if (!before && activePage > 1) {
-          debugger;
+          setPrev(true);
+          // issue with prev failing to get value for before when past the first page
+          // another way to fix this is to set the count to a high number e.g 555
+          setPrevPage(children[children.length - 1].data.id);
+        }
+
+        if (before && before !== prevPage) {
+          setPrev(true);
+          setPrevPage(before);
+        }
+      })
+      .catch((err) => {
+        return;
+      });
+    setIsLoading(false);
+  };
+
+  const fetchItemsNext = (subreddit, limit, nextPage) => {
+    setIsLoading(true);
+    reddit
+      .nextPage(subreddit, limit, nextPage)
+      .then((items) => {
+        const { after, before, children } = items.data;
+        setData(children);
+        // setActivePage(1);
+        if (after && after !== nextPage) {
+          setNext(true);
+          setNextPage(after);
+        }
+
+        if (!before && activePage > 1) {
+          setPrev(true);
+          // issue with prev failing to get value for before when past the first page
+          // another way to fix this is to set the count to a high number e.g 555
+          setPrevPage(children[children.length - 1].data.id);
+        }
+
+        if (before && before !== prevPage) {
+          setPrev(true);
+          setPrevPage(before);
+        }
+      })
+      .catch((err) => {
+        return;
+      });
+    setIsLoading(false);
+  };
+
+  const fetchItemsPrev = (subreddit, limit, prevPage) => {
+    setIsLoading(true);
+    reddit
+      .prevPage(subreddit, limit, prevPage)
+      .then((items) => {
+        const { after, before, children } = items.data;
+        setData(children);
+        // setActivePage(1);
+        console.log(after);
+        if (after && after !== nextPage) {
+          setNext(true);
+          setNextPage(after);
+        }
+
+        if (!before && activePage > 1) {
           setPrev(true);
           // issue with prev failing to get value for before when past the first page
           // another way to fix this is to set the count to a high number e.g 555
@@ -75,9 +137,7 @@ const Search = ({ query, limit }) => {
   };
 
   const onNextHandler = () => {
-    fetchItems(
-      `https://www.reddit.com/r/${subreddit}.json?limit=${limit}&after=${nextPage}&count=555&sort=new`
-    );
+    fetchItemsNext(subreddit, limit, nextPage);
     setActivePage(activePage + 1);
   };
 
@@ -86,9 +146,7 @@ const Search = ({ query, limit }) => {
       setPrev(false);
       return;
     }
-    fetchItems(
-      `https://www.reddit.com/r/${subreddit}.json?limit=${limit}&before=${prevPage}&count=555&sort=new`
-    );
+    fetchItemsPrev(subreddit, limit, prevPage);
     setActivePage(activePage - 1);
   };
 
@@ -100,9 +158,7 @@ const Search = ({ query, limit }) => {
   // https://github.com/reddit-archive/reddit/wiki/JSON
   // https://www.reddit.com/r/redditdev/comments/d8zl00/another_after_and_before_question/
   useEffect(() => {
-    fetchItems(
-      `https://www.reddit.com/r/${subreddit}.json?limit=${limit}&sort=new`
-    );
+    fetchItems(subreddit, limit);
     setActivePage(1);
   }, [subreddit]);
 
@@ -117,6 +173,7 @@ const Search = ({ query, limit }) => {
               type={"search"}
               defaultValue={subreddit}
               onChange={setSubreddit}
+              data-testid="SearchBox"
             />
             <InputGroup.Addon>
               <Icon icon="search" />
@@ -131,6 +188,7 @@ const Search = ({ query, limit }) => {
               next={next}
               onNextHandler={onNextHandler}
               onPrevHandler={onPrevHandler}
+              page={activePage}
             />
           )}
         </FlexboxGrid.Item>
@@ -139,7 +197,7 @@ const Search = ({ query, limit }) => {
       {isLoading && <Loader size="lg" center={true} backdrop={true} />}
 
       {data && (
-        <List hover>
+        <List data-testid="results" hover>
           {data.map((post, index) => (
             <List.Item key={`${post.data.id}${index}`} index={index + 1}>
               <Post key={`${post.data.id}${index}`} post={post.data} />

@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ButtonToolbar, Button, Icon } from "rsuite";
+import { ButtonToolbar, Button, Icon, Steps } from "rsuite";
 
 export default function Pagination({
   prev,
   next,
   onPrevHandler,
   onNextHandler,
+  page,
 }) {
   return (
     <ButtonToolbar>
@@ -19,6 +20,8 @@ export default function Pagination({
       >
         Prev
       </Button>
+      <span>{page}</span>
+
       <Button
         disabled={!next}
         icon={<Icon icon="arrow-right" />}
@@ -37,4 +40,5 @@ Pagination.propTypes = {
   next: PropTypes.bool,
   onPrevHandler: PropTypes.func.isRequired,
   onNextHandler: PropTypes.func.isRequired,
+  page: PropTypes.number,
 };

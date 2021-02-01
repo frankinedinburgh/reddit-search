@@ -11,6 +11,7 @@ describe("Pagination Component", () => {
         next={true}
         onPrevHandler={() => {}}
         onNextHandler={() => {}}
+        page={1}
       />
     );
     const { getByTestId } = render();
@@ -30,4 +31,8 @@ describe("Pagination Component", () => {
     console.log(nextBtn);
     // screen.debug();
   });
+
+  test("onPrevHandler works as expected", () => {});
+
+  test("onNextHandler works as expected", () => {});
 });
